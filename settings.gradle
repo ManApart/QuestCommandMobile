@@ -1,1 +1,7 @@
 include ':app'
+
+include ':QuestCommand'
+project(':QuestCommand').projectDir = new File(settingsDir, '../../Games/QuestCommand')
+
+
+//include "B:\\Coding\\Workspace\\Games\\QuestCommand"
