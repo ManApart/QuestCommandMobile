@@ -1,14 +1,14 @@
 package rak.org.questcommandmobile
 
-import QuestCommand.core.gameState.Values
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
+import core.gameState.Values
 
 import kotlinx.android.synthetic.main.activity_main.*
-import QuestCommand.system.help.ViewHelpEvent
+import system.help.ViewHelpEvent
 
 class MainActivity : AppCompatActivity() {
 
