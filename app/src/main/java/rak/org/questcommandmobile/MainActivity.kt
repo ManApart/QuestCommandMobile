@@ -1,5 +1,6 @@
 package rak.org.questcommandmobile
 
+import QuestCommand.core.gameState.Values
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 
 import kotlinx.android.synthetic.main.activity_main.*
+import QuestCommand.system.help.ViewHelpEvent
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,6 +22,8 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
 
+        val thing = ViewHelpEvent()
+        val other = Values()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
