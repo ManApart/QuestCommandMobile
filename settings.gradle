@@ -1,4 +1,1 @@
 include ':app'
-
-//include ':QuestCommand'
-//project(':QuestCommand').projectDir = new File(settingsDir, '../../Games/QuestCommand')
