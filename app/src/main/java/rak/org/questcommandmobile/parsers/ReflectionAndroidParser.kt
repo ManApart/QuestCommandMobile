@@ -1,4 +1,4 @@
-package rak.org.questcommandmobile
+package rak.org.questcommandmobile.parsers
 
 import android.content.res.AssetManager
 import core.commands.Command
@@ -8,7 +8,7 @@ import core.utility.ReflectionParser
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class ReflectionAndroidParser(val assets: AssetManager) : ReflectionParser {
+class ReflectionAndroidParser(private val assets: AssetManager) : ReflectionParser {
     override val events: List<Class<out Event>> by lazy { getAllEvents() }
     override val commands: List<Class<out Command>> by lazy { getAllCommands() }
     override val eventListeners: List<Class<out EventListener<*>>> by lazy { getAllEventListeners() }
@@ -35,7 +35,6 @@ class ReflectionAndroidParser(val assets: AssetManager) : ReflectionParser {
 
     private fun <E> getClassesFromFile(file: String): List<Class<E>> {
         val classes = mutableListOf<Class<E>>()
-
         val ins = InputStreamReader(assets.open(file))
 
         BufferedReader(ins).use { br ->
