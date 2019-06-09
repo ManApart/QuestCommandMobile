@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
 //        val fileName = "./src/main/res/data/generated/commands.txt"
-        val fileName = "generated/commands.txt"
+        val fileName = "data/generated/events.txt"
 
         val ins = InputStreamReader(assets.open(fileName))
 
