@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import core.commands.CommandParser
+import core.utility.ReflectionParser
 import kotlinx.android.synthetic.main.activity_main.*
+import system.DependencyInjector
+import system.EventManager
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -18,9 +21,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-//        val fileName = "./src/main/res/data/generated/commands.txt"
-        val fileName = "data/generated/events.txt"
+//        testReadAssetFiles()
 
+        DependencyInjector.setImplementation(ReflectionParser::class.java, ReflectionAndroidParser(assets))
+        EventManager.registerListeners()
+//        GameManager.newGame()
+//        CommandParser.parseInitialCommand(arrayOf())
+
+        fab.setOnClickListener { view ->
+            CommandParser.parseCommand("Look")
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show()
+        }
+    }
+
+    private fun testReadAssetFiles() {
+        listOf(
+            "data/generated/events.txt",
+            "data/generated/commands.txt",
+            "data/generated/eventListeners.txt"
+        ).forEach { testReadAssetFile(it) }
+
+    }
+
+    private fun testReadAssetFile(fileName: String) {
         val ins = InputStreamReader(assets.open(fileName))
 
         BufferedReader(ins).use { br ->
@@ -29,17 +53,6 @@ class MainActivity : AppCompatActivity() {
                 println(line)
                 line = br.readLine()
             }
-        }
-
-
-//        EventManager.registerListeners()
-//        GameManager.newGame()
-//        CommandParser.parseInitialCommand(arrayOf())
-
-        fab.setOnClickListener { view ->
-            CommandParser.parseCommand("Look")
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
         }
     }
 
