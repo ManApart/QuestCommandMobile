@@ -1,16 +1,20 @@
 package rak.org.questcommandmobile
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import core.commands.CommandParser
 import core.gameState.quests.QuestParser
+import core.history.ChatHistory
 import core.utility.ReflectionParser
 import core.utility.ResourceHelper
 import crafting.RecipeParser
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 import rak.org.questcommandmobile.parsers.*
 import status.effects.EffectParser
 import system.DependencyInjector
@@ -23,29 +27,64 @@ import system.body.BodyParser
 import system.creature.CreatureParser
 import system.item.ItemParser
 import system.location.LocationParser
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import android.text.Selection
+import android.text.Editable
+import android.text.method.ScrollingMovementMethod
+
+
+
+
 
 
 class MainActivity : AppCompatActivity() {
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> true
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-//        testReadAssetFiles()
+        initApp()
 
+        val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        history.movementMethod = ScrollingMovementMethod()
+        commandText.setOnEditorActionListener { v, _, _ ->
+            imm.hideSoftInputFromWindow(v.windowToken, 0)
+            execute(v.text.toString())
+            true
+        }
+
+        executeCommand.setOnClickListener {
+            execute(commandText.text.toString())
+        }
+
+        btnHelp.setOnClickListener {
+            execute("Help")
+        }
+
+        btnLook.setOnClickListener {
+            execute("Look")
+        }
+
+    }
+
+    private fun initApp() {
         injectDependencies()
         EventManager.registerListeners()
         GameManager.newGame()
         CommandParser.parseInitialCommand(arrayOf("ls"))
-
-        fab.setOnClickListener { view ->
-            CommandParser.parseCommand("Look")
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
+        history.text = getOutput()
     }
 
     private fun injectDependencies() {
@@ -63,40 +102,25 @@ class MainActivity : AppCompatActivity() {
         DependencyInjector.setImplementation(ResourceHelper::class.java, ResourceAndroidHelper(assets))
     }
 
-    private fun testReadAssetFiles() {
-        listOf(
-            "data/generated/events.txt",
-            "data/generated/commands.txt",
-            "data/generated/eventListeners.txt"
-        ).forEach { testReadAssetFile(it) }
+    @SuppressLint("SetTextI18n")
+    private fun execute(command: String) {
+        println("Executing: $command")
+        CommandParser.parseCommand(command)
+        history.append("\n\n${getOutput()}")
+        commandText.text.clear()
+
+//        val editable = history.editableText
+//        Selection.setSelection(editable, editable.length)
+//        historyScroll.scrollTo(0, -Int.MAX_VALUE)
+//        historyScroll.fullScroll(View.FOCUS_DOWN)
+
+        val scrollAmount = history.layout.getLineTop(history.lineCount) - history.height
+        history.scrollTo(0, scrollAmount)
 
     }
 
-    private fun testReadAssetFile(fileName: String) {
-        val ins = InputStreamReader(assets.open(fileName))
-
-        BufferedReader(ins).use { br ->
-            var line = br.readLine()
-            while (line != null) {
-                println(line)
-                line = br.readLine()
-            }
-        }
+    private fun getOutput() : String {
+        return ChatHistory.getCurrent().outPut.joinToString("\n")
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
 }
