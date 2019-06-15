@@ -11,28 +11,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.TableRow
 import core.commands.CommandParser
-import core.gameState.quests.QuestParser
 import core.history.ChatHistory
-import core.utility.ReflectionParser
-import core.utility.ResourceHelper
-import crafting.RecipeParser
 import kotlinx.android.synthetic.main.content_main.*
-import rak.org.questcommandmobile.parsers.*
-import status.effects.EffectParser
-import system.DependencyInjector
-import system.EventManager
-import system.GameManager
-import system.activator.ActivatorParser
-import system.ai.AIParser
-import system.behavior.BehaviorParser
-import system.body.BodyParser
-import system.creature.CreatureParser
-import system.item.ItemParser
-import system.location.LocationParser
 
 
 class MainActivity : AppCompatActivity() {
-    private var inited = false
+    private var started = false
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -63,37 +47,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         buildButtons(listOf("Help", "Commands", "Look"))
-
-        initApp()
+        AppStarter(this, assets).execute()
     }
 
-    private fun initApp() {
-        injectDependencies()
-        EventManager.registerListeners()
-        GameManager.newGame()
-        CommandParser.parseInitialCommand(arrayOf("ls"))
-        history.text = getOutput()
-        inited = true
-    }
-
-    private fun injectDependencies() {
-        DependencyInjector.setImplementation(ActivatorParser::class.java, ActivatorAndroidParser(assets))
-        DependencyInjector.setImplementation(AIParser::class.java, AIAndroidParser(assets))
-        DependencyInjector.setImplementation(BehaviorParser::class.java, BehaviorAndroidParser(assets))
-        DependencyInjector.setImplementation(BodyParser::class.java, BodyAndroidParser(assets))
-        DependencyInjector.setImplementation(CreatureParser::class.java, CreatureAndroidParser(assets))
-        DependencyInjector.setImplementation(EffectParser::class.java, EffectAndroidParser(assets))
-        DependencyInjector.setImplementation(ItemParser::class.java, ItemAndroidParser(assets))
-        DependencyInjector.setImplementation(LocationParser::class.java, LocationAndroidParser(assets))
-        DependencyInjector.setImplementation(QuestParser::class.java, QuestAndroidParser(assets))
-        DependencyInjector.setImplementation(RecipeParser::class.java, RecipeAndroidParser(assets))
-        DependencyInjector.setImplementation(ReflectionParser::class.java, ReflectionAndroidParser(assets))
-        DependencyInjector.setImplementation(ResourceHelper::class.java, ResourceAndroidHelper(assets))
+    fun setStarted() {
+        started = true
+        execute("ls")
     }
 
     @SuppressLint("SetTextI18n")
     private fun execute(command: String) {
-        if (inited) {
+        if (started) {
             println("Executing: $command")
             CommandParser.parseCommand(command)
             if (!getOutput().isBlank()){
@@ -102,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             commandText.text.clear()
             refreshOptions()
         } else {
-            println("Not inited, so skipping command $command")
+            println("Not started, so skipping command $command")
         }
     }
 
@@ -130,7 +94,6 @@ class MainActivity : AppCompatActivity() {
             val end = Math.min(start + columns, words.size)
             words.subList(start, end).forEach { buildButton(it, rowTable) }
         }
-
     }
 
     private fun buildButton(word: String, view: TableRow) {
