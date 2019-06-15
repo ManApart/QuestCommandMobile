@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">QuestCommandMobile</string>
     <string name="action_settings">Settings</string>
-    <string name="loading">Loading</string>
+    <string name="loading">Loading…</string>
     <string name="defaultCommand">Look</string>
     <string name="executeCommand"><![CDATA[->]]></string>
 </resources>

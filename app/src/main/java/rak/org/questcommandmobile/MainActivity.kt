@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
+import android.widget.TableRow
 import core.commands.CommandParser
 import core.gameState.quests.QuestParser
 import core.history.ChatHistory
@@ -27,16 +29,10 @@ import system.body.BodyParser
 import system.creature.CreatureParser
 import system.item.ItemParser
 import system.location.LocationParser
-import android.text.Selection
-import android.text.Editable
-import android.text.method.ScrollingMovementMethod
-
-
-
-
 
 
 class MainActivity : AppCompatActivity() {
+    private var inited = false
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -54,10 +50,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initApp()
-
         val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-
         history.movementMethod = ScrollingMovementMethod()
         commandText.setOnEditorActionListener { v, _, _ ->
             imm.hideSoftInputFromWindow(v.windowToken, 0)
@@ -69,14 +62,9 @@ class MainActivity : AppCompatActivity() {
             execute(commandText.text.toString())
         }
 
-        btnHelp.setOnClickListener {
-            execute("Help")
-        }
+        buildButtons(listOf("Help", "Commands", "Look"))
 
-        btnLook.setOnClickListener {
-            execute("Look")
-        }
-
+        initApp()
     }
 
     private fun initApp() {
@@ -85,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         GameManager.newGame()
         CommandParser.parseInitialCommand(arrayOf("ls"))
         history.text = getOutput()
+        inited = true
     }
 
     private fun injectDependencies() {
@@ -104,23 +93,53 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun execute(command: String) {
-        println("Executing: $command")
-        CommandParser.parseCommand(command)
-        history.append("\n\n${getOutput()}")
-        commandText.text.clear()
+        if (inited) {
+            println("Executing: $command")
+            CommandParser.parseCommand(command)
+            if (!getOutput().isBlank()){
+                history.append("\n\n${getOutput()}")
+            }
+            commandText.text.clear()
+            refreshOptions()
+        } else {
+            println("Not inited, so skipping command $command")
+        }
+    }
 
-//        val editable = history.editableText
-//        Selection.setSelection(editable, editable.length)
-//        historyScroll.scrollTo(0, -Int.MAX_VALUE)
-//        historyScroll.fullScroll(View.FOCUS_DOWN)
+    private fun getOutput(): String {
+        return ChatHistory.getCurrent().outPut.joinToString("\n")
+    }
 
-        val scrollAmount = history.layout.getLineTop(history.lineCount) - history.height
-        history.scrollTo(0, scrollAmount)
+    private fun refreshOptions() {
+        if (CommandParser.responseRequest == null){
+            execute("Commands")
+        } else {
+            buildButtons(CommandParser.responseRequest?.getOptions() ?: listOf())
+        }
+    }
+
+    private fun buildButtons(words: List<String>) {
+        btnTable.removeAllViews()
+        val columns = 4
+        val rows = words.size/columns
+        for (row in 0..rows){
+            val rowTable = TableRow(this)
+            btnTable.addView(rowTable)
+
+            val start = columns * row
+            val end = Math.min(start + columns, words.size)
+            words.subList(start, end).forEach { buildButton(it, rowTable) }
+        }
 
     }
 
-    private fun getOutput() : String {
-        return ChatHistory.getCurrent().outPut.joinToString("\n")
+    private fun buildButton(word: String, view: TableRow) {
+        val btn = Button(this)
+        btn.text = word
+        btn.setOnClickListener {
+            execute(word)
+        }
+        view.addView(btn)
     }
 
 }
