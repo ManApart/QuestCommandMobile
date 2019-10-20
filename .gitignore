@@ -14,3 +14,5 @@
 *QuestCommand
 **/res/data
 **/assets/data
+app/src/main/ic*
+app/src/main/res/mipmap*/**

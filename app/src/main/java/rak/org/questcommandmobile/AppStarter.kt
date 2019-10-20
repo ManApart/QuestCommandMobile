@@ -3,8 +3,9 @@ package rak.org.questcommandmobile
 import android.content.res.AssetManager
 import android.os.AsyncTask
 import core.gameState.quests.QuestParser
-import core.utility.ReflectionParser
 import core.utility.ResourceHelper
+import core.utility.reflection.GeneratedReflections
+import core.utility.reflection.Reflections
 import crafting.RecipeParser
 import rak.org.questcommandmobile.parsers.*
 import system.DependencyInjector
@@ -42,7 +43,7 @@ class AppStarter(private val parent: MainActivity, private val assets: AssetMana
         DependencyInjector.setImplementation(LocationParser::class.java, LocationAndroidParser(assets))
         DependencyInjector.setImplementation(QuestParser::class.java, QuestAndroidParser(assets))
         DependencyInjector.setImplementation(RecipeParser::class.java, RecipeAndroidParser(assets))
-        DependencyInjector.setImplementation(ReflectionParser::class.java, ReflectionAndroidParser(assets))
+        DependencyInjector.setImplementation(Reflections::class.java, GeneratedReflections())
         DependencyInjector.setImplementation(ResourceHelper::class.java, ResourceAndroidHelper(assets))
     }
 }
